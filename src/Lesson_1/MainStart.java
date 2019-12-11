@@ -9,7 +9,6 @@ class MainStart{
         box1.startTest(tools);
         box2.startTest(tools);
         box3.startTest(tools);
-
 //        box1.name = "asd";
     }
 }
@@ -26,18 +25,16 @@ class Box {
     void startTest(Tools tools) {
         tools.infoToolsAndBox(this);
     }
-
 }
 
 class Tools {
+    String tools;
+
     public Tools(String tools) {
         this.tools = tools;
     }
 
-    String tools;
     void infoToolsAndBox(Box box) {
-        System.out.println(tools + " "
-                + box.name + " "
-                + box.weight);
+        System.out.println(tools + " "+ box.name + " "+ box.weight);
     }
 }
