@@ -28,9 +28,9 @@ public class Mammals implements Competitor {
     @Override
     public void run(int dist) {
         if (dist <= maxRunDistance) {
-            System.out.println(type + " " + name + " хорошо справился с кроссом");
+            System.out.println(type + " " + name + " хорошо справился с кроссом "+dist+" метров");
         } else {
-            System.out.println(type + " " + name + " не справился с кроссом");
+            System.out.println(type + " " + name + " не справился с кроссом "+dist+" метров, так как может пробежать только "+maxRunDistance+" метров");
             onDistance = false;
         }
     }
@@ -38,9 +38,9 @@ public class Mammals implements Competitor {
     @Override
     public void jump(int height) {
         if (height <= maxJumpHeight) {
-            System.out.println(type + " " + name + " удачно перепрыгнул через стену");
+            System.out.println(type + " " + name + " удачно перепрыгнул через стену "+height+" метров");
         } else {
-            System.out.println(type + " " + name + " не смог перепрыгнуть стену");
+            System.out.println(type + " " + name + " не смог перепрыгнуть стену "+height+" метров так как может прыгнуть только "+maxJumpHeight+" метров");
             onDistance = false;
         }
     }
@@ -53,20 +53,15 @@ public class Mammals implements Competitor {
             return;
         }
         if (dist <= maxSwimDistance) {
-            System.out.println(type + " " + name + " отлично проплыл");
+            System.out.println(type + " " + name + " отлично проплыл "+dist+" метров");
         } else {
-            System.out.println(type + " " + name + " не смог проплыть");
+            System.out.println(type + " " + name + " не смог проплыть "+dist+" метров, так как может проплыть только "+maxSwimDistance+" метров");
             onDistance = false;
         }
     }
 
     @Override
     public void info() {
-        System.out.println(type + " " + name + " - " + onDistance);
-    }
-
-    @Override
-    public void putMeInArray(Competitor[] arrTeam, int arrayIndex) {
-        arrTeam[arrayIndex] = (Competitor) this;
+        System.out.println(type + " " + name + " - " + onDistance+ " Победитлеь!");
     }
 }

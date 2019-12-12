@@ -8,5 +8,4 @@ public class Human extends Mammals {
     public Human(String name, int maxRunDistance, int maxJumpHeight, int maxSwimDistance) {
         super("Человек", name, maxRunDistance, maxJumpHeight, maxSwimDistance);
     }
-
 }
