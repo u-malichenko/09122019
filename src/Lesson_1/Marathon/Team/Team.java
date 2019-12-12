@@ -1,30 +1,23 @@
 package Lesson_1.Marathon.Team;
 
 public class Team {
-    String teamName;
-    Competitor[] arrTeam;
+    private String name;
+    private Competitor[] competitors;
+//private ArrayList<Competitor> competitors = new  ArrayList<Competitor>(); //создали массив команды через инрефейс, все участники наследники класса млекопитающие
 
-    public Team(String teamName) {
-        this.teamName = teamName;
-        Mammals cat1 = new Cat("Барсик");
-//всем участникам можно задавать различные характеристики, а можно и просто имя
-        Mammals cat2 = new Cat("Мурка", 150, 15, 0);
-        Mammals dog1 = new Dog("Бобик");
-        Mammals human1 = new Human("Боб");
-//создали массив команды через инрефейс, все участники наследники класса млекопитающие
-        this.arrTeam = new Mammals[4];
-//заносим в массив участников различных подклассов класса млекопитающие(куда имплементирован интерфейс участников)
-        cat1.putMeInArray(this.arrTeam, 0);
-        cat2.putMeInArray(this.arrTeam, 1);
-        dog1.putMeInArray(this.arrTeam, 2);
-        human1.putMeInArray(this.arrTeam, 3);
+    public Team(String teamName, Competitor... competitor) {
+        this.name = teamName;
+        this.competitors =competitor;
+//        for (Competitor c: competitor) {
+//            competitors.add(c);
+//        }
     }
 
     /**
      * метод вывода информации обо всех членах команды
      */
     public void info() {
-        for (Competitor c : this.arrTeam) { // перебираем всех участников и выводиминформацию о каждом из них
+        for (Competitor c : this.competitors) { // перебираем всех участников и выводиминформацию о каждом из них
             c.info();
         }
     }
@@ -33,7 +26,7 @@ public class Team {
      * метод для вывода информации о членах команды прошедших дистанцию
      */
     public void showResults() {
-        for (Competitor c : this.arrTeam) { // перебираем всех участников и выводиминформацию о победителях
+        for (Competitor c : this.competitors) { // перебираем всех участников и выводиминформацию о победителях
             if (c.isOnDistance())
                 c.info();
         }
@@ -43,8 +36,9 @@ public class Team {
      * Метод получения массива участников
      * @return
      */
+//    public ArrayList<Competitor> getArrTeam() {
     public Competitor[] getArrTeam() {
-        return arrTeam;
+        return competitors;
     }
 }
 
