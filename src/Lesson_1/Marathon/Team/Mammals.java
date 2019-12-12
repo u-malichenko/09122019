@@ -1,6 +1,7 @@
-package Lesson_1.Marathon;
+package Lesson_1.Marathon.Team;
 
-public class Animal implements Competitor {
+//Млекопитающие)
+public class Mammals implements Competitor {
     String type;
     String name;
 
@@ -15,7 +16,7 @@ public class Animal implements Competitor {
         return onDistance;
     }
 
-    public Animal(String type, String name, int maxRunDistance, int maxJumpHeight, int maxSwimDistance) {
+    public Mammals(String type, String name, int maxRunDistance, int maxJumpHeight, int maxSwimDistance) {
         this.type = type;
         this.name = name;
         this.maxRunDistance = maxRunDistance;
@@ -62,5 +63,10 @@ public class Animal implements Competitor {
     @Override
     public void info() {
         System.out.println(type + " " + name + " - " + onDistance);
+    }
+
+    @Override
+    public void putMeInArray(Competitor[] arrTeam, int arrayIndex) {
+        arrTeam[arrayIndex] = (Competitor) this;
     }
 }
