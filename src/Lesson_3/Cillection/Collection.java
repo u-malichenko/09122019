@@ -50,7 +50,7 @@ public class Collection {
         for (String s : arrayList) {
             if (!result.containsKey(s)) { //методы containsKey()(проверяет наличие какого-то ключа) и containsValue() (проверяет наличие значения).
                 result.put(s, 1);
-            } else if (result.containsKey(s)) {
+            } else {
                 result.put(s, result.get(s) + 1);
             }
         }
@@ -78,9 +78,11 @@ public class Collection {
         String[] symbolsArray = {"a", "b"}; //строка символов для создания слов
         StringBuilder letters = new StringBuilder(); // строка с буквами
         Random random = new Random();
+        int randomIndex = random.nextInt(symbolsArray.length);
+        String randomChar = symbolsArray[randomIndex];
 
         for (int i = 0; i < sizeStrings; i++) {
-            letters.append(symbolsArray[random.nextInt(symbolsArray.length)]);
+            letters.append(randomChar);
         }
         return letters.toString();
     }
