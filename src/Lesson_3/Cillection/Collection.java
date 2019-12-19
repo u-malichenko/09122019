@@ -33,7 +33,7 @@ public class Collection {
      * @param mapCollection - колекция в которой уже собраны ключи(уникальные строки) и занчения(количество повторений этих строк)
      */
     private static void printMap(HashMap<String, Integer> mapCollection) {
-        for (HashMap.Entry<String, Integer> pair : mapCollection.entrySet()) {
+        for (HashMap.Entry<String, Integer> pair : mapCollection.entrySet()) { //entrySet() возвращает список всех пар в нашей HashMap Интерфейс Map.Entry обозначает как раз пару “ключ-значение” внутри словаря
             System.out.println(pair.getKey() + " " + pair.getValue());
         }
     }
@@ -48,7 +48,7 @@ public class Collection {
         HashMap<String, Integer> result = new HashMap<>(); //временная коллекция, нужна для генерации основной
 
         for (String s : arrayList) {
-            if (!result.containsKey(s)) {
+            if (!result.containsKey(s)) { //методы containsKey()(проверяет наличие какого-то ключа) и containsValue() (проверяет наличие значения).
                 result.put(s, 1);
             } else if (result.containsKey(s)) {
                 result.put(s, result.get(s) + 1);
