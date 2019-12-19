@@ -18,10 +18,10 @@ public class Collection {
 
         ArrayList<String> originalArrayList = new ArrayList<>(Arrays.asList(originalArray)); //сконевертировал масив в лист
 
-        HashSet<String> uniqueCollection = new HashSet<>(originalArrayList); //массив с уникальными значениями из исходного
+        Set<String> uniqueCollection = new HashSet<>(originalArrayList); //массив с уникальными значениями из исходного
         System.out.println("Уникальная колекция: " + uniqueCollection);
 
-        HashMap<String, Integer> mapCollection = countArray(originalArrayList); //запускаем метод для генерирования Map
+        Map<String, Integer> mapCollection = countArray(originalArrayList); //запускаем метод для генерирования Map
 
         printMap(mapCollection); // печать количества циклом
 
@@ -32,8 +32,8 @@ public class Collection {
      *
      * @param mapCollection - колекция в которой уже собраны ключи(уникальные строки) и занчения(количество повторений этих строк)
      */
-    private static void printMap(HashMap<String, Integer> mapCollection) {
-        for (HashMap.Entry<String, Integer> pair : mapCollection.entrySet()) { //entrySet() возвращает список всех пар в нашей HashMap Интерфейс Map.Entry обозначает как раз пару “ключ-значение” внутри словаря
+    private static void printMap(Map<String, Integer> mapCollection) {
+        for (Map.Entry<String, Integer> pair : mapCollection.entrySet()) { //entrySet() возвращает список всех пар в нашей HashMap Интерфейс Map.Entry обозначает как раз пару “ключ-значение” внутри словаря
             System.out.println(pair.getKey() + " " + pair.getValue());
         }
     }
@@ -44,18 +44,15 @@ public class Collection {
      * @param arrayList - исходный список сгенерированных слов
      * @return - коллекция где ключи = словам из originalArray, а значения это количество повторений ключей
      */
-    private static HashMap<String, Integer> countArray(ArrayList<String> arrayList) {
-        HashMap<String, Integer> result = new HashMap<>(); //временная коллекция, нужна для генерации основной
+    private static Map<String, Integer> countArray(ArrayList<String> arrayList) {
+        Map<String, Integer> result = new HashMap<>(); //временная коллекция, нужна для генерации основной
 
         for (String s : arrayList) {
-            if (!result.containsKey(s)) { //методы containsKey()(проверяет наличие какого-то ключа) и containsValue() (проверяет наличие значения).
-                result.put(s, 1);
-            } else {
-                result.put(s, result.get(s) + 1);
-            }
+            result.merge(s,1,Integer::sum);
         }
         return result;
     }
+
 
     /**
      * Создать массив с набором слов (10-20 слов, должны встречаться повторяющиеся)
