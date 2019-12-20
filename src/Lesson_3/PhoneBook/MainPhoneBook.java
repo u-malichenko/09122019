@@ -18,18 +18,17 @@ import java.util.*;
 
 class MainPhoneBook {
     public static void main(String[] args) {
-        PhoneBook newPhoneBook = new PhoneBook();
+        PhoneBook newPhoneBook = new PhoneBook(); // создаем новый объект класса
 
         for (int i = 0; i < 15; i++) {
-            newPhoneBook.add("Ivanov " + (char) (i + 65), "+7921445010" + i);
+            newPhoneBook.add("Ivanov " + i, "+7921445010" + i); //инициируем заполнеие нового объекта класса новыми записями
         }
 
-        newPhoneBook.add("Ivanov " + (char) 66, "+7921445010" + 9);
+        newPhoneBook.add("Ivanov " + 1, "+7921445010" + 9); //добавляем вторую запись
 
-        newPhoneBook.get("Ivanov " + (char) 65);
-        newPhoneBook.get("Ivanov " + (char) 66);
-        newPhoneBook.get("Ivanov " + (char) 90);
-
+        for (int i = 0; i < 17; i++) {
+            newPhoneBook.get("Ivanov " + i); //выводим информацию
+        }
     }
 }
 
@@ -40,9 +39,9 @@ class MainPhoneBook {
  * поиск g фамилии - метод get
  */
 class PhoneBook {
-    private Map<String, List<String>> phoneBook = new HashMap<>();
-    private List<String> phoneList;
-    String[] notFound = {"нет в справочнике"}; //для реализации примера из видеоурока
+    private Map<String, HashSet<String>> phoneBookHM = new HashMap<>();
+    private HashSet<String> phoneHS;
+    HashSet<String> notFound = new HashSet<>(); //для реализации дефолтного значения если в справочнике нет такой фамилии
 
     /**
      * Метод для добавления элементов в спраочник
@@ -51,13 +50,13 @@ class PhoneBook {
      * @param phone   телефон
      */
     public void add(String surname, String phone) {
-        if (phoneBook.containsKey(surname)) {
-            phoneList = phoneBook.get(surname);
+        if (phoneBookHM.containsKey(surname)) { //проверяем есть ли такой ключ в коллекции
+            phoneHS = phoneBookHM.get(surname); // если есть то копируем его коллекцию с телефонаи во временную коллецию phoneHS (для добавления нового номера)
         } else {
-            phoneList = new ArrayList<>();
+            phoneHS = new HashSet<>(); //создаем новую коллекцию, если такого s ключа еще не было
         }
-        phoneList.add(phone);
-        phoneBook.put(surname, phoneList);
+        phoneHS.add(phone); //добавляем телефон в коллекцию этого ключа
+        phoneBookHM.put(surname, phoneHS); //добавляем эту колекцию с уникальными (set) ключами в коллекцию нашего справочника
 
     }
 
@@ -67,7 +66,8 @@ class PhoneBook {
      * @param surname - фамилия = ключ Map
      */
     public void get(String surname) {
-        System.out.println(surname + " " + phoneBook.getOrDefault(surname, Arrays.asList(notFound)));
+        notFound.add("нет такого номера"); //для реализации дефолтного значения если в справочнике нет такой фамилии
+        System.out.println(surname + " " + phoneBookHM.getOrDefault(surname, notFound));
     }
 
 }
