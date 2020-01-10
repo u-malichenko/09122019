@@ -4,22 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainTopObjectRec {
-    static List<TopObject> topObjects = new ArrayList<>();
-    static List<TopObject> topObjectsResultList = new ArrayList<>();
+    static List<TopObject1> topObjects = new ArrayList<>();
+    static List<TopObject1> topObjectsResultList = new ArrayList<>();
 
     public static void main(String[] args) {
-        topObjects.add(new TopObject(1, null));
-        topObjects.add(new TopObject(2, "1"));
-        topObjects.add(new TopObject(3, "2"));
-        topObjects.add(new TopObject(4, "1"));
-        topObjects.add(new TopObject(5, null));
-        topObjects.add(new TopObject(6, "5"));
-        topObjects.add(new TopObject(7, null));
+        topObjects.add(new TopObject1(1, null));
+        topObjects.add(new TopObject1(2, "1"));
+        topObjects.add(new TopObject1(3, "2"));
+        topObjects.add(new TopObject1(4, "1"));
+        topObjects.add(new TopObject1(5, null));
+        topObjects.add(new TopObject1(6, "5"));
+        topObjects.add(new TopObject1(7, null));
 
-        // topObjects.add(new TopObject(8, "3"));
+         topObjects.add(new TopObject1(8, "3"));
 
-        for (TopObject obj : topObjects) {
-            add(obj);
+        for (TopObject1 obj : topObjects) {
+            addTO(obj);
         }
        // fac(5);
     }
@@ -33,33 +33,36 @@ public class MainTopObjectRec {
 //        }
 //    }
 
-    static void add(TopObject obj) {
-        if (!obj.hasParent()) {
-            topObjectsResultList.add(obj);
-        } else {
-            for (int i = 0; i < topObjectsResultList.size(); i++) {
+    static void addTO(TopObject1 obj) { //передаем в метод обект из полного списка, тот который мы проверяем в цикле
+        if (!obj.hasParent()) { // если обект имееет ноль в родителях (не тру =фолс)
+            topObjectsResultList.add(obj); //добавляем в результирующую таблицу этот объект
+        } else { //иначе если обект имеет не ноль в родителях (а предполагается индекс родителя) значит будем искать ему родиетля и туда добавлять!
+            for (int i = 0; i < topObjectsResultList.size(); i++) { //делаем цикл длинной в размер результирующего массива, будем обходить новый массив в поисках родиетля
 
-                addChild(obj, i);
+                addChild(obj, i); // запускаем мтеод добавления деток, передаем в его обект  из полного списка(кот мы проверяем) и индекс элемента для сравнения из результирующего списка
 
-                if (topObjectsResultList.get(i).getId() == Integer.parseInt(obj.getParentId())) {
-                    topObjectsResultList.get(i).setChild(obj);
-                    if (!obj.hasParent()) {
-                        add(topObjectsResultList.get(i));
+                if (topObjectsResultList.get(i).getId() == Integer.parseInt(obj.getParentId())) { //если результ.список с итым элементом имеет (запускаем геттер) айди = текушщий элемент полного списка.(геттер)иди родителя
+                    topObjectsResultList.get(i).setChild(obj);//в результ.списке с итым элементом запускаем сеттер добавления текушего объекта
+                    if (!obj.hasParent()) { //если обект имет нольь в родителях(сам верхний родитель)
+                        addTO(topObjectsResultList.get(i)); //запускаем рекурсивно этот же мтоед передаем в его из резуль.списка итый обект
                     } else {
-                        break;
+                        break; // иначе, если обект не верхний родитель прерываем и выходим из цикла по результирующему массиву
                     }
                 }
             }
         }
     }
 
-    static void addChild(TopObject obj, int i) {
-        if (topObjectsResultList.get(i).getChildren().size() != 0) {
-            for (int j = 0; j < topObjectsResultList.get(i).getChildren().size(); j++) {
-                if (topObjectsResultList.get(i).getChildren().get(j).getId() == Integer.parseInt(obj.getParentId())) {
-                    topObjectsResultList.get(i).getChildren().get(j).setChild(obj);
+    static void addChild(TopObject1 obj, int i) {// мтеод добавления деток, получает обект  из полного списка(кот мы проверяем) и индекс элемента для сравнения из результирующего списка
+        if (topObjectsResultList.get(i).getChildren().size() != 0) { //если в результирующем массиве итый элемент,запускаем (метод)провверяем размер списка деток если  он равен 0 ни чего не делаем(нужен для проверки детей поддетей)
+           //тут должна быть рекурсия
+            for (int j = 0; j < topObjectsResultList.get(i).getChildren().size(); j++) {//иначе - делаем цикл обхода в итом элементе результ.списка всех детей
+                if (topObjectsResultList.get(i).getChildren().get(j).getId() == Integer.parseInt(obj.getParentId())) { //если в итом элементе в списке его деток, джитая детка (запускаем геттер)имеет индекс равный проверяемому обекту - индексу родителя
+                    topObjectsResultList.get(i).getChildren().get(j).setChild(obj); //в итом элементе резулт.списка у джитой дочки запускам метод (сеттер) добавления нового текущего объекта
+                    //тут можно прервать проверку завершить все циклы
                 }
-            }
-        }
+            } //конец цикла ждитых деток
+
+        } // если список детей у итого элемента результирующей таблицы равен нулю выходим из добавления.Список пусст и проверять там нечего!
     }
 }

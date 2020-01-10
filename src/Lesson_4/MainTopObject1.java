@@ -3,32 +3,32 @@ package Lesson_4;
 import java.util.ArrayList;
 import java.util.List;
 
-class MainTopObject{
-    static List<TopObject> topObjects = new ArrayList<>();
+class MainTopObject1 {
+    static List<TopObject1> topObjects = new ArrayList<>();
 
     public static void main(String[] args) {
 
-        topObjects.add(new TopObject(1, null));
-        topObjects.add(new TopObject(2, "1"));
-        topObjects.add(new TopObject(3, "2"));
-        topObjects.add(new TopObject(4, "1"));
-        topObjects.add(new TopObject(5, null));
-        topObjects.add(new TopObject(6, "5"));
-        topObjects.add(new TopObject(7, null));
+        topObjects.add(new TopObject1(1, null));
+        topObjects.add(new TopObject1(2, "1"));
+        topObjects.add(new TopObject1(3, "2"));
+        topObjects.add(new TopObject1(4, "1"));
+        topObjects.add(new TopObject1(5, null));
+        topObjects.add(new TopObject1(6, "5"));
+        topObjects.add(new TopObject1(7, null));
 
-        for (TopObject obj : topObjects) {
+        for (TopObject1 obj : topObjects) {
             if (obj.hasParent()){
                 setChild(obj);
             }
         }
 
-        for (TopObject obj : topObjects) {
+        for (TopObject1 obj : topObjects) {
             System.out.println("Parent: " + obj.getId() + " Children: ");
             obj.showChildren();
         }
     }
 
-    private static void setChild(TopObject topObject) {
+    private static void setChild(TopObject1 topObject) {
         int parentId;
         try{
             parentId = Integer.parseInt(topObject.getParentId());
@@ -37,7 +37,7 @@ class MainTopObject{
             return;
         }
 
-        for (TopObject object : topObjects) {
+        for (TopObject1 object : topObjects) {
             if(object.getId() == parentId){
                 object.setChild(topObject);
             }
@@ -47,19 +47,18 @@ class MainTopObject{
 
 }
 
-class TopObject {
+class TopObject1 {
     private int id;
     private String parentId;
+    private ArrayList<TopObject1> children = new ArrayList<>();
 
-    public ArrayList<TopObject> getChildren() {
-        return children;
-    }
-
-    private ArrayList<TopObject> children = new ArrayList<>();
-
-    TopObject(int id, String parentId){
+    TopObject1(int id, String parentId){
         this.id = id;
         this.parentId = parentId;
+    }
+
+    public ArrayList<TopObject1> getChildren() {
+        return children;
     }
 
     public int getId() {return id;}
@@ -67,7 +66,7 @@ class TopObject {
     public String getParentId() {return parentId;}
 
     public boolean hasParent(){
-        if(this.parentId != null){
+        if(this.parentId != null){ //перент айди не нулевой! = тру
             return true;
         }
         return false;
@@ -78,12 +77,12 @@ class TopObject {
             System.out.println("No child objects");
             return;
         }
-        for (TopObject child : children) {
+        for (TopObject1 child : children) {
             System.out.println(child.getId());
         }
     }
 
-    public void setChild(TopObject child) {
+    public void setChild(TopObject1 child) {
 
         this.children.add(child);
     }
