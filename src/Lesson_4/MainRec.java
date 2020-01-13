@@ -4,7 +4,6 @@ import java.util.*;
 
 public class MainRec {
     static List<TopObject> topObjects = new ArrayList<>();
-
     public static void main(String[] args) {
         new TopObject(1, null);
         new TopObject(2, 1);
