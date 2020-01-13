@@ -6,7 +6,7 @@ import java.util.List;
 
 public class DZ_5_Thread {
     public static void main(String[] args) {
-        WorkInArray myArray = new WorkInArray(300000, 10000000);
+        WorkInArray myArray = new WorkInArray(30000, 10000000);
         myArray.method1();
         myArray.method2();
         WorkInArray myArrayNew = new WorkInArray(3000, 10000000);
@@ -35,7 +35,7 @@ class WorkInArray {
         fillArray(arr);
         System.out.println("Запуск вычисления в одном потоке, ждите...");
         long a = System.currentTimeMillis();
-        countNewValueInArray(arr);
+        countNewValueInArray(arr,0);
         System.out.println(System.currentTimeMillis() - a + " мс. - одном потоке");
     }
 
@@ -61,7 +61,7 @@ class WorkInArray {
             arrayOfThread.add(i, new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    countNewValueInArray(arrayOfArrays.get(finalI));
+                    countNewValueInArray(arrayOfArrays.get(finalI),finalI*h);
                 }
             }));
             arrayOfThread.get(finalI).start();
@@ -77,9 +77,9 @@ class WorkInArray {
         }
     }
 
-    public void countNewValueInArray(float[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            arr[i] = (float) (arr[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+    public void countNewValueInArray(float[] arr,int x) {
+        for (int i = 0; i < arr.length; i++, x++) {
+            arr[i] = (float) (arr[i] * Math.sin(0.2f + x / 5) * Math.cos(0.2f + x / 5) * Math.cos(0.4f + x / 2));
         }
     }
 
