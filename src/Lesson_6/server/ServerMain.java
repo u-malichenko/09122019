@@ -8,6 +8,10 @@ import java.util.Vector;
 public class ServerMain {
     private Vector<ClientHandler> clients;
 
+    public Vector<ClientHandler> getClients() {
+        return clients;
+    }
+
     public ServerMain() {
         clients = new Vector<>();
         ServerSocket server = null;
@@ -39,7 +43,7 @@ public class ServerMain {
         }
     }
 
-    public void broadcastMsg(String msg) {
+    public void broadcastMsg(String msg) { //перебирает список всех клиентов и вызывает у каждого метод отправки сообщения
         for (ClientHandler o: clients) {
             o.sendMsg(msg);
         }

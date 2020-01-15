@@ -22,17 +22,20 @@ public class ClientHandler {
                 @Override
                 public void run() {
                     try {
+
                         while (true) {
-                            String str = in.readUTF();
+                            String str = in.readUTF(); //клиент присылает сообщение мы его считываем
                             if (str.equals("/end")) {
-                                out.writeUTF("/serverClosed");
+                                out.writeUTF("/serverClosed"); //отправить сообщение на клиент, чтоб он закрыл свой сокет тоже
                                 break;
                             }
-                            System.out.println("Client: " + str);
-                            server.broadcastMsg(str);
+                            System.out.println("Client: " +Thread.currentThread().getName()+" "+ str);
+                            server.broadcastMsg(str); //запуск метода на стороне сервера для отправки сообщения во все клиенты
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
+                    }finally {
+                       del();
                     }
                 }
             }).start();
@@ -40,8 +43,12 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
+    public void del(){
+        server.getClients().remove(this);
 
-    public void sendMsg(String str) {
+    }
+
+    public void sendMsg(String str) { //метод для отправки сообщения конкретному клиенту
         try {
             out.writeUTF(str);
         } catch (IOException e) {
