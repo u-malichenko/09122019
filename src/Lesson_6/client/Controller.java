@@ -4,7 +4,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -27,6 +26,8 @@ public class Controller implements Initializable {
     final String IP_ADPRESS = "localhost";
     final int PORT = 8189;
 
+
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
@@ -39,15 +40,16 @@ public class Controller implements Initializable {
                 public void run() {
                     try {
                         while (true) {
-                            String str = in.readUTF();
-                            if (str.equals("/serverClosed")) break;
-                            textArea.appendText(str + "\n");
+                            String str = in.readUTF(); //сюда приходит сообщене от сервера
+                            if (str.equals("/serverClosed")) break; //если один сокет закрылся (на сервере)то и другой (тут у клиента)сокет нужно закрыть
+                            textArea.appendText(str + "\n"); //поместить в поле клиента
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
                     } finally {
                         try {
                             socket.close();
+                            System.exit(1);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -61,7 +63,7 @@ public class Controller implements Initializable {
 
     public void sendMsg() {
         try {
-            out.writeUTF(textField.getText());
+            out.writeUTF(textField.getText()); //отправить сообщене серверу
             textField.clear();
             textField.requestFocus();
         } catch (IOException e) {
