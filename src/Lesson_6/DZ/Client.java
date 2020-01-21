@@ -5,105 +5,83 @@ import java.net.Socket;
 
 public class Client {
 
-    private static Socket clientSocket; //сокет для общения
-    private static BufferedReader inputUser; // нам нужен ридер читающий с консоли, иначе как
-    // мы узнаем что хочет сказать клиент?
+    private static Socket clientSocket;
+    private static BufferedReader inputUser; // нам нужен ридер читающий с консоли
     private static BufferedReader in; // поток чтения из сокета
     private static BufferedWriter out; // поток записи в сокет
-    private static boolean close = false;
 
     public static void main(String[] args) {
         try {
-            try {
-                // адрес - локальный хост, порт - 9999, такой же как у сервера
-                clientSocket = new Socket("localhost", 9999); // этой строкой мы запрашиваем
-                //  у сервера доступ на соединение
-                inputUser = new BufferedReader(new InputStreamReader(System.in));
-                // читать соообщения с сервера
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                // писать туда же
-                out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+            clientSocket = new Socket("localhost", 9999);
 
-                // WRITE нить отправляющая сообщения приходящие с консоли на сервер
-                Thread serverWrite = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
+            inputUser = new BufferedReader(new InputStreamReader(System.in));
+            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+
+            //READ ждем сообщения с сервера
+            Thread serverRead = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    String str;
+                    try {
                         while (true) {
-                            String userWord;
-                            try {
-                                System.out.println("Вы что-то хотели сказать? Введите это здесь:");
-                                userWord = inputUser.readLine();// сообщения с консоли
-                                if (userWord.equals("exit")) { // харакири
-                                    try {
-                                        clientSocket.close();
-                                        in.close();
-                                        out.close();
-                                    } catch (IOException ignored) {
-                                    }
-                                    break; // выходим из цикла если пришло "exit"
-                                } else {
-                                    out.write("Client: " + userWord + "\n"); // отправляем на сервер
-                                }
+                            str = in.readLine(); // ждем сообщения с сервера
+                            if (str.equals("exit")) {
+                                out.write("exit");//отправляем закрытие клиента знак серверу для закрытия
                                 out.flush(); // чистим
-                            } catch (IOException e) {
-                                // в случае исключения тоже харакири
-                                try {
-                                    clientSocket.close();
-                                    in.close();
-                                    out.close();
-                                } catch (IOException ignored) {
-                                }
+                                System.out.println("Server go out(");
+                                break; // выходим из цикла если пришло "exit"
                             }
-
+                            System.out.println("Server: " + str); // пишем сообщение с сервера на консоль
                         }
+                    } catch (IOException e) {
+                        System.out.println("serverRead");
+                        e.printStackTrace();
                     }
-                });
+                }
+            });
+            serverRead.start();
 
-                Thread serverRead = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String str;
+            // WRITE отправляем сообщения с консоли на сервер
+            Thread serverWrite = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        String userWord;
                         try {
-                            while (true) {
-                                str = in.readLine(); // ждем сообщения с сервера
-                                if (str.equals("exit")) {
-                                    try {
-                                        clientSocket.close();
-                                        in.close();
-                                        out.close();
-                                    } catch (IOException ignored) {
-                                    }
-                                    break; // выходим из цикла если пришло "exit"
-                                }
-                                System.out.println(str); // пишем сообщение с сервера на консоль
-                            }
+                            System.out.println("Введите сообщение:");
+                            userWord = inputUser.readLine();// сообщения с консоли
+                            out.write(userWord + "\n"); // отправляем на сервер
+                            out.flush(); // чистим
                         } catch (IOException e) {
-                            // в случае исключения тоже харакири
-                            try {
-                                clientSocket.close();
-                                in.close();
-                                out.close();
-                            } catch (IOException ignored) {
-                            }
+                            System.out.println("serverWrite");
+                            e.printStackTrace();
                         }
                     }
-                });
+                }
+            });
+            serverWrite.setDaemon(true);
+            serverWrite.start();
 
-                serverWrite.start();
-                serverRead.start();
-
+            try {
                 serverRead.join();
-                serverRead.join();
-
-            } finally { // в любом случае необходимо закрыть сокет и потоки
-                System.out.println("Клиент был закрыт...");
-                clientSocket.close();
-                inputUser.close();
-                in.close();
-                out.close();
+            } catch (InterruptedException e) {
+                System.out.println("error join");
+                e.printStackTrace();
             }
-        } catch (IOException | InterruptedException e) {
-            System.err.println(e);
+
+
+        } catch (IOException e) {
+            System.out.println("error main!");
+            e.printStackTrace();
+        } finally { // в любом случае сокет будет закрыт
+            try {
+                clientSocket.close();
+                System.out.println("socket close finally");
+            } catch (IOException e) {
+                System.out.println("finally socket error");
+                e.printStackTrace();
+            }
         }
     }
 }
