@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Client {
+public class $2MyClient {
 
     private static Socket clientSocket;
     private static Scanner consoleRead; // нам нужен ридер читающий с консоли

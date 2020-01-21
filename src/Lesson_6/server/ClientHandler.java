@@ -10,6 +10,7 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private ServerMain server;
+    private String nick;
 
     public ClientHandler(ServerMain server, Socket socket) {
         try {
@@ -24,18 +25,49 @@ public class ClientHandler {
                     try {
 
                         while (true) {
-                            String str = in.readUTF(); //клиент присылает сообщение мы его считываем
+                            String str = in.readUTF();
+                            if (str.startsWith("/auth")) {
+                                String[] tokes = str.split(" ");
+                                String newNick = AuthService.getNickByLoginAndPass(tokes[1], tokes[2]);
+                                if (newNick != null) {
+                                    sendMsg("/authok");
+                                    nick = newNick;
+                                    server.subscribe(ClientHandler.this);
+                                    break;
+                                } else {
+                                    sendMsg("Неверный логин/пароль");
+                                }
+                            }
+                        }
+
+                        while (true) {
+                            String str = in.readUTF();
                             if (str.equals("/end")) {
-                                out.writeUTF("/serverClosed"); //отправить сообщение на клиент, чтоб он закрыл свой сокет тоже
+                                out.writeUTF("/serverClosed");
                                 break;
                             }
-                            System.out.println("Client: " +Thread.currentThread().getName()+" "+ str);
-                            server.broadcastMsg(str); //запуск метода на стороне сервера для отправки сообщения во все клиенты
+                            System.out.println("Client: " + str);
+                            server.broadcastMsg(nick + ": " + str);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                    }finally {
-                        del();
+                    } finally {
+                        try {
+                            in.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            out.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        server.unsubscribe(ClientHandler.this);
                     }
                 }
             }).start();
@@ -43,12 +75,8 @@ public class ClientHandler {
             e.printStackTrace();
         }
     }
-    public void del(){
-        server.getClients().remove(this);
 
-    }
-
-    public void sendMsg(String str) { //метод для отправки сообщения конкретному клиенту
+    public void sendMsg(String str) {
         try {
             out.writeUTF(str);
         } catch (IOException e) {

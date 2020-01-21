@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Server {
+public class $2MyServer {
 
     private static Socket clientSocket; //сокет для общения
     private static ServerSocket server; // серверсокет

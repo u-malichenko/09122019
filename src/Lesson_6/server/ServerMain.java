@@ -8,23 +8,23 @@ import java.util.Vector;
 public class ServerMain {
     private Vector<ClientHandler> clients;
 
-    public Vector<ClientHandler> getClients() {
-        return clients;
-    }
-
     public ServerMain() {
         clients = new Vector<>();
         ServerSocket server = null;
         Socket socket = null;
 
         try {
+            AuthService.connect();
+//            String str = AuthService.getNickByLoginAndPass("login1", "pass1");
+//            System.out.println(str);
             server = new ServerSocket(8189);
             System.out.println("Сервер запущен!");
 
             while (true) {
                 socket = server.accept();
                 System.out.println("Клиент подключился");
-                clients.add(new ClientHandler(this, socket));
+                new ClientHandler(this, socket);
+               // clients.add(new ClientHandler(this, socket));
             }
 
         } catch (IOException e) {
@@ -40,10 +40,19 @@ public class ServerMain {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            AuthService.disconnect();
         }
     }
 
-    public void broadcastMsg(String msg) { //перебирает список всех клиентов и вызывает у каждого метод отправки сообщения
+    public void subscribe(ClientHandler client) {
+        clients.add(client);
+    }
+
+    public void unsubscribe(ClientHandler client) {
+        clients.remove(client);
+    }
+
+    public void broadcastMsg(String msg) {
         for (ClientHandler o: clients) {
             o.sendMsg(msg);
         }

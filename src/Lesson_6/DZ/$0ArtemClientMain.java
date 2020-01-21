@@ -1,23 +1,16 @@
 package Lesson_6.DZ;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class ServerMain {
+public class $0ArtemClientMain {
     public static void main(String[] args) {
-
-        ServerSocket server = null;
         Socket socket = null;
 
         try {
-            server = new ServerSocket(8189);
-
-            socket = server.accept();
+            socket = new Socket("localhost", 8189);
 
             Scanner in = new Scanner(socket.getInputStream());
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -32,7 +25,7 @@ public class ServerMain {
                             out.println("/end");
                             break;
                         }
-                        System.out.println("Client " + str);
+                        System.out.println("Server " + str);
                     }
                 }
             });
@@ -66,11 +59,7 @@ public class ServerMain {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            try {
-                server.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
+
     }
 }
