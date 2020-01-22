@@ -28,7 +28,7 @@ public class ServerMain {
                 System.out.println("Клиент подключился");
                 new ClientHandler(this, socket);
                 //подписка в векторлист переехала в конструктор клиентхендлера, тут просто создаем новый объект клиентхендлер
-               // clients.add(new ClientHandler(this, socket));
+                // clients.add(new ClientHandler(this, socket));
             }
 
         } catch (IOException e) {
@@ -56,8 +56,21 @@ public class ServerMain {
         clients.remove(client);
     }
 
+    public void toLoginMsg(String nick, String msg) {
+
+        for (ClientHandler o : clients) {
+
+            //clients.contains(o.getNick())
+            String[] tokes = msg.split(" ", 3);
+            if (tokes[1].equals(o.getNick())) {
+                o.sendMsg(nick + ": " + tokes[2]);
+                break;
+            }
+        }
+    }
+
     public void broadcastMsg(String msg) {
-        for (ClientHandler o: clients) {
+        for (ClientHandler o : clients) {
             o.sendMsg(msg);
         }
     }

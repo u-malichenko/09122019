@@ -20,6 +20,12 @@ public class AuthService {
         }
     }
 
+    /**
+     * получение ника по логину и паролю
+     * @param login
+     * @param pass
+     * @return
+     */
     public static String getNickByLoginAndPass(String login, String pass) {
         //формируем запрос к бд
         String sql = String.format("SELECT nickname FROM main where login = '%s' and password = '%s'", login, pass);

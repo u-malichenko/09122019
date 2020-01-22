@@ -26,9 +26,7 @@ public class ClientHandler {
                         //первый цикл по авторизации, вротой не начнется пока не пройдет этот
                         while (true) {
                             String str = in.readUTF(); //читаем поток в цикле
-                            /**
-                             * TODO вставить ветку по косойчерте для сервисных сообщений
-                             */
+
                             if (str.startsWith("/auth")) { //смотрим с чего начинаетс строка
                                 String[] tokes = str.split(" "); //берем массив и делаем нашу строчку делаем сплит по пробелу
                                 //запускаем метод с логином и паролем
@@ -54,12 +52,20 @@ public class ClientHandler {
                         //цикл работы
                         while (true) {
                             String str = in.readUTF();
-                            if (str.equals("/end")) {
-                                out.writeUTF("/serverClosed");
-                                break;
+                            if (str.startsWith("/")){
+                                if (str.equals("/end")) { //завершение работы чата
+                                    out.writeUTF("/serverClosed");
+                                    break;
+                                }
+                                if (str.startsWith("/w")) { //отправка личного сообщения «/w nick3 Привет»
+                                    server.toLoginMsg(nick, str); //добавили имя пользователя вк сообщению
+
+                                }
+                            }else { //отправим сообщение сразу всем
+                                System.out.println(nick + ": " + str);
+                                server.broadcastMsg(nick + ": " + str); //запускаем метод на сервере
+                                // добавили имя пользователя вк сообщению
                             }
-                            System.out.println("Client: " + str);
-                            server.broadcastMsg(nick + ": " + str); //добавили имя пользователя вк сообщению
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -86,6 +92,10 @@ public class ClientHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getNick() {
+        return nick;
     }
 
     public void sendMsg(String str) {
