@@ -10,6 +10,7 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private ServerMain server;
+    private String nick;
 
     public ClientHandler(ServerMain server, Socket socket) {
         try {
@@ -22,6 +23,23 @@ public class ClientHandler {
                 @Override
                 public void run() {
                     try {
+
+                        while (true) {
+                            String str = in.readUTF();
+                            if (str.startsWith("/auth")) {
+                                String[] tokes = str.split(" ");
+                                String newNick = AuthService.getNickByLoginAndPass(tokes[1], tokes[2]);
+                                if (newNick != null) {
+                                    sendMsg("/authok");
+                                    nick = newNick;
+                                    server.subscribe(ClientHandler.this);
+                                    break;
+                                } else {
+                                    sendMsg("Неверный логин/пароль");
+                                }
+                            }
+                        }
+
                         while (true) {
                             String str = in.readUTF();
                             if (str.equals("/end")) {
@@ -29,10 +47,27 @@ public class ClientHandler {
                                 break;
                             }
                             System.out.println("Client: " + str);
-                            server.broadcastMsg(str);
+                            server.broadcastMsg(nick + ": " + str);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } finally {
+                        try {
+                            in.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            out.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            socket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        server.unsubscribe(ClientHandler.this);
                     }
                 }
             }).start();
