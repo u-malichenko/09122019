@@ -14,7 +14,10 @@ public class ServerMain {
         Socket socket = null;
 
         try {
-            AuthService.connect();
+            AuthService.connect();//сделаем подключение к базе
+            //работа с базой только на сервере!
+            //на клиенте только запросы!
+
 //            String str = AuthService.getNickByLoginAndPass("login1", "pass1");
 //            System.out.println(str);
             server = new ServerSocket(8189);
@@ -24,6 +27,7 @@ public class ServerMain {
                 socket = server.accept();
                 System.out.println("Клиент подключился");
                 new ClientHandler(this, socket);
+                //подписка в векторлист переехала в конструктор клиентхендлера, тут просто создаем новый объект клиентхендлер
                // clients.add(new ClientHandler(this, socket));
             }
 
@@ -40,7 +44,7 @@ public class ServerMain {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            AuthService.disconnect();
+            AuthService.disconnect(); //отключение от базы
         }
     }
 
