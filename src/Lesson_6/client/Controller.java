@@ -45,6 +45,7 @@ public class Controller {
     /**
      * позволяет переключать панели, показывать нижнюю или показывать верхнюю панель
      * при входе и при выходе авторизации/деавторизации
+     *
      * @param isAuthorized
      */
     public void setAuthorized(boolean isAuthorized) {
@@ -132,6 +133,7 @@ public class Controller {
 
     /**
      * метод для проверки аутентификации подключение
+     *
      * @param actionEvent
      */
     public void tryToAuth(ActionEvent actionEvent) {

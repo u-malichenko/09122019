@@ -22,6 +22,7 @@ public class AuthService {
 
     /**
      * получение ника по логину и паролю
+     *
      * @param login
      * @param pass
      * @return
