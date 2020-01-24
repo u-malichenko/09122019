@@ -36,7 +36,8 @@ public class ClientHandler {
                                 //проверяем чтоб не вернулось нулл
                                 if (newNick != null && !server.isNickBusy(newNick)) {
                                     //если не равно нулу то авторизвались правильно, отправляем аутОК
-                                    sendMsg("/authok");
+                                    sendMsg("/authok " + newNick);
+                                    //sendMsg("/authok");
                                     nick = newNick; //присваиваем то что вернул метод из аутентификации = имя текущего пользователя для подставноки в сообщения
                                     server.subscribe(ClientHandler.this); //делаем подписку, добавляем в векторлист объект
                                     break; //выходим из цыкла для начала работы с базой
