@@ -29,25 +29,31 @@ public class Controller {
     final int PORT = 8189;
 
     @FXML
-    HBox upperPanel;
+    HBox upperPanel; //верхняя панель для авторизации
 
     @FXML
-    HBox bottomPanel;
+    HBox bottomPanel; //нижняя спрятанная панель для работы самого чата
 
     @FXML
-    TextField loginField;
+    TextField loginField; //
 
     @FXML
     PasswordField passwordField;
 
-    private boolean isAuthorized;
+    private boolean isAuthorized; //флаг для проверки авторизации, для ченжа панелей
 
+    /**
+     * позволяет переключать панели, показывать нижнюю или показывать верхнюю панель
+     * при входе и при выходе авторизации/деавторизации
+     *
+     * @param isAuthorized
+     */
     public void setAuthorized(boolean isAuthorized) {
-        this.isAuthorized = isAuthorized;
-        if (!isAuthorized) {
-            upperPanel.setVisible(true);
+        this.isAuthorized = isAuthorized; //чтоб переменная имела одно занчение при переключениях
+        if (!isAuthorized) { //если не фолс = тру если не тру = фолс
+            upperPanel.setVisible(true); //поакзывать верхнюю паенль
             upperPanel.setManaged(true);
-            bottomPanel.setVisible(false);
+            bottomPanel.setVisible(false); //не показывать нижнюю
             bottomPanel.setManaged(false);
         } else {
             upperPanel.setVisible(false);
@@ -68,16 +74,19 @@ public class Controller {
                 @Override
                 public void run() {
                     try {
+                        //цикл для авторизации, по аналогии с клиентхендлером, вротой не начнется пока не пройдет этот
                         while (true) {
                             String str = in.readUTF();
-                            if (str.startsWith("/authok")) {
-                                setAuthorized(true);
+                            if (str.startsWith("/authok")) { //если строка начинается с метки авторизации
+                                setAuthorized(true); //запускаем метод для смены верхней и нижней панели с тру!
                                 break;
                             } else {
-                                textArea.appendText(str + "\n");
+                                textArea.appendText(str + "\n"); //отправляем сообщение в текстфилд
+                                // для обозначения что логин пароль не верный, если он не верный
                             }
                         }
 
+                        //цикл для работа
                         while (true) {
                             String str = in.readUTF();
                             if (str.equals("/serverClosed")) break;
@@ -101,6 +110,8 @@ public class Controller {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        //при выходе запускаем метод и скрываем панель для работы чата
+                        // и открываем вновь панель для ввода логина и пароля
                         setAuthorized(false);
                     }
                 }
@@ -120,13 +131,20 @@ public class Controller {
         }
     }
 
+    /**
+     * метод для проверки аутентификации подключение
+     *
+     * @param actionEvent
+     */
     public void tryToAuth(ActionEvent actionEvent) {
-        if (socket == null || socket.isClosed()) {
-            connect();
+        if (socket == null || socket.isClosed()) { // если сокета нет или он закрыт вызываем метод коннект
+            connect(); // метод авторизации на сервере лежит там же авторизейшен сервис!
         }
         try {
+            //отправка авторизации "/auth " все разделить пробелами для сплита
             out.writeUTF("/auth " + loginField.getText() + " " + passwordField.getText());
-            loginField.clear();
+
+            loginField.clear(); //чистим поля за собой, вдрег новые будут вводить
             passwordField.clear();
         } catch (IOException e) {
             e.printStackTrace();

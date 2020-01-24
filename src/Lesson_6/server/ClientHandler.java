@@ -10,7 +10,7 @@ public class ClientHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private ServerMain server;
-    private String nick;
+    private String nick; //ник
 
     public ClientHandler(ServerMain server, Socket socket) {
         try {
@@ -23,31 +23,46 @@ public class ClientHandler {
                 @Override
                 public void run() {
                     try {
-
+                        //первый цикл по авторизации, вротой не начнется пока не пройдет этот
                         while (true) {
-                            String str = in.readUTF();
-                            if (str.startsWith("/auth")) {
-                                String[] tokes = str.split(" ");
+                            String str = in.readUTF(); //читаем поток в цикле
+
+                            if (str.startsWith("/auth")) { //смотрим с чего начинаетс строка
+                                String[] tokes = str.split(" "); //берем массив и делаем нашу строчку делаем сплит по пробелу
+                                //запускаем метод с логином и паролем
                                 String newNick = AuthService.getNickByLoginAndPass(tokes[1], tokes[2]);
-                                if (newNick != null) {
+                                //если соотвествующих записей не найдется то вернется НУЛЛЛ, там так написан код
+                                //проверяем чтоб не вернулось нулл
+                                if (newNick != null && !server.isNickBusy(newNick)) {
+                                    //если не равно нулу то авторизвались правильно, отправляем аутОК
                                     sendMsg("/authok");
-                                    nick = newNick;
-                                    server.subscribe(ClientHandler.this);
-                                    break;
+                                    nick = newNick; //присваиваем то что вернул метод из аутентификации = имя текущего пользователя для подставноки в сообщения
+                                    server.subscribe(ClientHandler.this); //делаем подписку, добавляем в векторлист объект
+                                    break; //выходим из цыкла для начала работы с базой
+                                } else if (server.isNickBusy(newNick)) {
+                                    sendMsg(tokes[1] + " Этот логин уже занят!");
                                 } else {
                                     sendMsg("Неверный логин/пароль");
                                 }
                             }
                         }
 
+                        //цикл работы
                         while (true) {
                             String str = in.readUTF();
-                            if (str.equals("/end")) {
-                                out.writeUTF("/serverClosed");
-                                break;
+                            if (str.startsWith("/")) {
+                                if (str.equals("/end")) { //завершение работы чата
+                                    out.writeUTF("/serverClosed");
+                                    break;
+                                }
+                                if (str.startsWith("/w")) { //отправка личного сообщения «/w nick3 Привет»
+                                    server.sendPersonalMsg(ClientHandler.this, str); //добавили имя пользователя вк сообщению
+                                }
+                            } else { //отправим сообщение сразу всем
+                                System.out.println(nick + ": " + str);
+                                server.broadcastMsg(nick + ": " + str); //запускаем метод на сервере
+                                // добавили имя пользователя вк сообщению
                             }
-                            System.out.println("Client: " + str);
-                            server.broadcastMsg(nick + ": " + str);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -74,6 +89,10 @@ public class ClientHandler {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String getNick() {
+        return nick;
     }
 
     public void sendMsg(String str) {
