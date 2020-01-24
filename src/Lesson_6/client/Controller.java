@@ -1,8 +1,10 @@
 package Lesson_6.client;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -42,6 +44,9 @@ public class Controller {
 
     private boolean isAuthorized; //флаг для проверки авторизации, для ченжа панелей
 
+    @FXML
+    ListView<String> clientList; //список актуальных клиентов
+
     /**
      * позволяет переключать панели, показывать нижнюю или показывать верхнюю панель
      * при входе и при выходе авторизации/деавторизации
@@ -55,11 +60,15 @@ public class Controller {
             upperPanel.setManaged(true);
             bottomPanel.setVisible(false); //не показывать нижнюю
             bottomPanel.setManaged(false);
+            clientList.setVisible(false); //не показывать панель с клиентами
+            clientList.setManaged(false);
         } else {
             upperPanel.setVisible(false);
             upperPanel.setManaged(false);
             bottomPanel.setVisible(true);
             bottomPanel.setManaged(true);
+            clientList.setVisible(true); //показать панель с клиентами
+            clientList.setManaged(true);
         }
     }
 
@@ -86,11 +95,27 @@ public class Controller {
                             }
                         }
 
-                        //цикл для работа
+                        //цикл для работы
                         while (true) {
-                            String str = in.readUTF();
-                            if (str.equals("/serverClosed")) break;
-                            textArea.appendText(str + "\n");
+                            String str = in.readUTF(); //читаем данные с сокета
+                            if (str.equals("/serverClosed")) break; //если пришло серверклозе то делаем брейк
+                            if (str.startsWith("/clientlist")) { //если сообщение начинается с клиентлист, значит
+                                // с сервера к нам пришла строка в корой находится список всех клиентов
+                                String[] tokens = str.split(" "); //парсим ее по сплитам по пробелам
+                                Platform.runLater(new Runnable() { //реализация Анонимного класса через новый поток,
+                                    // Platform - специализированый поток по рабоате с графическими элементами непосредственно во фрймвоке ДжаваФХ
+                                    // нужен чтоб синхронизировать работу при изменении наших клиентов, оно будет происходить в отдельном потоке
+                                    @Override
+                                    public void run() {
+                                        clientList.getItems().clear(); // берм список наших клиентов и чистим его каждый раз когда приходят новые клиенты
+                                        for (int i = 1; i < tokens.length; i++) { //циклдля обхода всех элементов нового списка клиентов
+                                            clientList.getItems().add(tokens[i]); //добавляем нашу строку обратно из пришедшео распаршеного списка
+                                        }
+                                    }
+                                });
+                            } else {
+                                textArea.appendText(str + "\n"); //иначе добавляем сообщение в нашу текстАрею
+                            }
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

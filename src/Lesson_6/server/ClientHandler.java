@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.List;
 
 public class ClientHandler {
     private Socket socket;
@@ -30,7 +31,7 @@ public class ClientHandler {
                             if (str.startsWith("/auth")) { //смотрим с чего начинаетс строка
                                 String[] tokes = str.split(" "); //берем массив и делаем нашу строчку делаем сплит по пробелу
                                 //запускаем метод с логином и паролем
-                                String newNick = AuthService.getNickByLoginAndPass(tokes[1], tokes[2]);
+                                String newNick = WorkDB.getNickByLoginAndPass(tokes[1], tokes[2]);
                                 //если соотвествующих записей не найдется то вернется НУЛЛЛ, там так написан код
                                 //проверяем чтоб не вернулось нулл
                                 if (newNick != null && !server.isNickBusy(newNick)) {
@@ -49,7 +50,10 @@ public class ClientHandler {
 
                         //цикл работы
                         while (true) {
+                            String currentNick = ClientHandler.this.getNick();
                             String str = in.readUTF();
+
+                            //СЛУЖЕБНЫЙ БЛОК
                             if (str.startsWith("/")) {
                                 if (str.equals("/end")) { //завершение работы чата
                                     out.writeUTF("/serverClosed");
@@ -58,9 +62,18 @@ public class ClientHandler {
                                 if (str.startsWith("/w")) { //отправка личного сообщения «/w nick3 Привет»
                                     server.sendPersonalMsg(ClientHandler.this, str); //добавили имя пользователя вк сообщению
                                 }
+                                if (str.startsWith("/blacklist ")) { //черный список
+                                    String[] tokens = str.split(" ");
+                                    if(!currentNick.equals(tokens[1])){
+                                        String resultAddBlockList = WorkDB.addBlackList(currentNick, tokens[1]);
+                                        sendMsg(resultAddBlockList); // сообщение пользователю с результатом добавления
+                                    }else{
+                                        sendMsg("Извините, к сожалению не возможно добавить в черный список самого себя!"); // иначе сообщение об ошибке
+                                    }
+                                }
                             } else { //отправим сообщение сразу всем
                                 System.out.println(nick + ": " + str);
-                                server.broadcastMsg(nick + ": " + str); //запускаем метод на сервере
+                                server.broadcastMsg(ClientHandler.this, nick + ": " + str); //запускаем метод на сервере. отправляем этого пользователя и сообщение
                                 // добавили имя пользователя вк сообщению
                             }
                         }
@@ -93,6 +106,18 @@ public class ClientHandler {
 
     public String getNick() {
         return nick;
+    }
+
+    /**
+     * метод проверки по нику
+     * наличие у пользователя в блеклисте этого пользователя
+     * @param nick
+     * @return ДА, есть. или НЕТ
+     */
+    public boolean checkBlackList(String nick) {
+        //получаем список заблокированных ников
+        List<String> blackList = WorkDB.getBlackListNickByThisNick(ClientHandler.this.getNick());
+        return blackList.contains(nick);
     }
 
     public void sendMsg(String str) {

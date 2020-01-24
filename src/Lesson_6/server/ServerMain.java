@@ -14,12 +14,9 @@ public class ServerMain {
         Socket socket = null;
 
         try {
-            AuthService.connect();//сделаем подключение к базе
+            WorkDB.connect();//сделаем подключение к базе
             //работа с базой только на сервере!
             //на клиенте только запросы!
-
-//            String str = AuthService.getNickByLoginAndPass("login1", "pass1");
-//            System.out.println(str);
             server = new ServerSocket(8189);
             System.out.println("Сервер запущен!");
 
@@ -28,7 +25,6 @@ public class ServerMain {
                 System.out.println("Клиент подключился");
                 new ClientHandler(this, socket);
                 //подписка в векторлист переехала в конструктор клиентхендлера, тут просто создаем новый объект клиентхендлер
-                // clients.add(new ClientHandler(this, socket));
             }
 
         } catch (IOException e) {
@@ -44,28 +40,32 @@ public class ServerMain {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            AuthService.disconnect(); //отключение от базы
+            WorkDB.disconnect(); //отключение от базы
         }
     }
 
     public void subscribe(ClientHandler client) {
         clients.add(client);
+        broadcastClientList();
     }
 
     public void unsubscribe(ClientHandler client) {
         clients.remove(client);
+        broadcastClientList();
     }
 
     public void sendPersonalMsg(ClientHandler from, String msg) {
-        String[] tokes = msg.split(" ", 3);
-        for (ClientHandler o : clients) {
-            if (tokes[1].equals(o.getNick())) {
-                o.sendMsg("from " + from.getNick() + ": " + tokes[2]);
-                from.sendMsg("to " + o.getNick() + ": " + tokes[2]);
+        String[] tokens = msg.split(" ", 3);
+        for (ClientHandler o : clients) { //цикл обхода всех пользователей
+            if (tokens[1].equals(o.getNick()) && !o.checkBlackList(from.getNick())) { //если ник из сообщения пользователя совпадает с ником данногоо клиента,
+                // и у этого пользователя в блеклисте нет пользователя который отправляет
+                o.sendMsg("from " + from.getNick() + ": " + tokens[2]); //отправляем сообщеине этому клиенту
+                from.sendMsg("to " + o.getNick() + ": " + tokens[2]); //отправляем сообщеине пльзователю который отпралял
                 return;
             }
         }
-        from.sendMsg("клиент с ником - " + tokes[1] + " не найден");
+        from.sendMsg("клиент с ником - " + tokens[1] + " не найден, или вы занесены в его черный список. и не можете отправлять ему сообщения.");
+        // если ник не найден, пишем пользователю который отправлял что нет такого
     }
 
     public boolean isNickBusy(String nick) {
@@ -77,9 +77,27 @@ public class ServerMain {
         return false;
     }
 
-    public void broadcastMsg(String msg) {
-        for (ClientHandler o : clients) {
-            o.sendMsg(msg);
+    public void broadcastMsg(ClientHandler from, String msg) { //пришел пользователь, от кого мы собираемся отправить сообщение и сообщение
+        for (ClientHandler o : clients) { //перебираем список всех клиентов
+            if (!o.checkBlackList(from.getNick())) //проверяем, у каждого клиента мы смотрим черный список, и
+                // если нашего пользователя (от кого сообщение) нету в черном списке
+            o.sendMsg(msg); //то тогда мы отправляем сообщение, иначе сообщение не отправляем
+        }
+    }
+
+    /**
+     * метод который собирает список всех клиентов и отправляет их на сервер
+     */
+    public void broadcastClientList() {
+        StringBuilder sb = new StringBuilder(); //тот же стирнг только экономичнее, изменяемый
+        // строка имутабельный обект в памяти
+        sb.append("/clientlist "); //сначала добавляем служебное сообщение!!!!!
+        for (ClientHandler o : clients) { //перебор списка всех наших клиентов
+            sb.append(o.getNick() + " "); //добавление ника пользователя в список для отправки
+        }
+        String out = sb.toString(); // преобраховываю в одну строку исходящее сообщение = собраная строка в стрингбилдере
+        for (ClientHandler o: clients) { //перебор списка всех наших клиентов
+            o.sendMsg(out); //отправить готовую строку с новым списком пользователй
         }
     }
 }
