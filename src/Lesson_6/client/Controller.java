@@ -1,13 +1,15 @@
 package Lesson_6.client;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
+import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-
+import javafx.scene.layout.VBox;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -15,18 +17,16 @@ import java.net.Socket;
 
 
 public class Controller {
-    @FXML
-    TextArea textArea;
+    private Socket socket;
+    private DataInputStream in;
+    private DataOutputStream out;
+    private String nick = "";
+    private boolean isAuthorized; //флаг для проверки авторизации, для ченжа панелей
+    final String IP_ADPRESS = "localhost";
+    final int PORT = 8189;
 
     @FXML
     TextField textField;
-
-    Socket socket;
-    DataInputStream in;
-    DataOutputStream out;
-
-    final String IP_ADPRESS = "localhost";
-    final int PORT = 8189;
 
     @FXML
     HBox upperPanel; //верхняя панель для авторизации
@@ -40,7 +40,11 @@ public class Controller {
     @FXML
     PasswordField passwordField;
 
-    private boolean isAuthorized; //флаг для проверки авторизации, для ченжа панелей
+    @FXML
+    ListView messagesView;
+
+    @FXML
+    ListView<String> clientList; //список актуальных клиентов
 
     /**
      * позволяет переключать панели, показывать нижнюю или показывать верхнюю панель
@@ -55,14 +59,17 @@ public class Controller {
             upperPanel.setManaged(true);
             bottomPanel.setVisible(false); //не показывать нижнюю
             bottomPanel.setManaged(false);
+            clientList.setVisible(false); //не показывать панель с клиентами
+            clientList.setManaged(false);
         } else {
             upperPanel.setVisible(false);
             upperPanel.setManaged(false);
             bottomPanel.setVisible(true);
             bottomPanel.setManaged(true);
+            clientList.setVisible(true); //показать панель с клиентами
+            clientList.setManaged(true);
         }
     }
-
 
     public void connect() {
         try {
@@ -78,19 +85,36 @@ public class Controller {
                         while (true) {
                             String str = in.readUTF();
                             if (str.startsWith("/authok")) { //если строка начинается с метки авторизации
+                                String[] mass = str.split(" "); //вытаскиваем ник
+                                nick = mass[1]; //присваиваем ник
                                 setAuthorized(true); //запускаем метод для смены верхней и нижней панели с тру!
                                 break;
                             } else {
-                                textArea.appendText(str + "\n"); //отправляем сообщение в текстфилд
-                                // для обозначения что логин пароль не верный, если он не верный
+                                setMsg(str); //запускаем метод
                             }
                         }
 
-                        //цикл для работа
+                        //цикл для работы
                         while (true) {
-                            String str = in.readUTF();
-                            if (str.equals("/serverClosed")) break;
-                            textArea.appendText(str + "\n");
+                            String str = in.readUTF(); //читаем данные с сокета
+                            if (str.equals("/serverClosed")) break; //если пришло серверклозе то делаем брейк
+                            if (str.startsWith("/clientlist")) { //если сообщение начинается с клиентлист, значит
+                                // с сервера к нам пришла строка в корой находится список всех клиентов
+                                String[] tokens = str.split(" "); //парсим ее по сплитам по пробелам
+                                Platform.runLater(new Runnable() { //реализация Анонимного класса через новый поток,
+                                    // Platform - специализированый поток по рабоате с графическими элементами непосредственно во фрймвоке ДжаваФХ
+                                    // нужен чтоб синхронизировать работу при изменении наших клиентов, оно будет происходить в отдельном потоке
+                                    @Override
+                                    public void run() {
+                                        clientList.getItems().clear(); // берм список наших клиентов и чистим его каждый раз когда приходят новые клиенты
+                                        for (int i = 1; i < tokens.length; i++) { //циклдля обхода всех элементов нового списка клиентов
+                                            clientList.getItems().add(tokens[i]); //добавляем нашу строку обратно из пришедшео распаршеного списка
+                                        }
+                                    }
+                                });
+                            } else {
+                                setMsg(str); //иначе добавляем сообщение в нашу текстАрею
+                            }
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -143,11 +167,27 @@ public class Controller {
         try {
             //отправка авторизации "/auth " все разделить пробелами для сплита
             out.writeUTF("/auth " + loginField.getText() + " " + passwordField.getText());
-
             loginField.clear(); //чистим поля за собой, вдрег новые будут вводить
             passwordField.clear();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void setMsg(String str) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                Label message = new Label(str);
+                VBox messageBox = new VBox(message);
+                if(nick != "") {
+                    String[] mass = str.split(":");
+                    if(nick.equalsIgnoreCase(mass[0])) {
+                        messageBox.setAlignment(Pos.CENTER_RIGHT);
+                    }
+                }
+                messagesView.getItems().add(messageBox);
+            }
+        });
     }
 }
